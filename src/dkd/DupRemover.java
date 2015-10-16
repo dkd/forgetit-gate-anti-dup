@@ -32,12 +32,27 @@ public class DupRemover extends AbstractLanguageAnalyser implements ProcessingRe
         Set<Annotation> deletees = new HashSet<Annotation>();
         Set<Annotation> visited = new HashSet<Annotation>();
 
+        //kick annotations which already are in the markup
+        AnnotationSet original = document.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("span");
+
         for (Annotation a : mentions)
         {
-            for (Annotation v : visited)
-                if (a.coextensive(v) && a.getFeatures().get("inst").equals(v.getFeatures().get("inst")))
-                    deletees.add(a);
+            for (Annotation v : original)
+            {
+                String i1 = a.getFeatures().get("inst").toString();
+                String i2 = v.getFeatures().get("resource") != null ? v.getFeatures().get("resource").toString() : "";
+                boolean coex = a.coextensive(v);
 
+                System.out.println("newpa:");
+                System.out.println(i1);
+                System.out.println(i2);
+
+                if (!coex)
+                    continue;
+                boolean same = i1.equals(i2);
+                if (same)
+                    deletees.add(a);
+            }
             visited.add(a);
         }
 
